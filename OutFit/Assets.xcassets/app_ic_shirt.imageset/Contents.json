@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "app_ic_shirt.png",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

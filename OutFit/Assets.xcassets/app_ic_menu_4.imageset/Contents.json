@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "app_ic_menu_4.png",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

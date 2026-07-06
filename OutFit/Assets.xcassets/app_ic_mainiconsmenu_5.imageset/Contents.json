@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "app_ic_mainiconsmenu_5.png",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
