@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "wardrobe_pink_bag.png",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

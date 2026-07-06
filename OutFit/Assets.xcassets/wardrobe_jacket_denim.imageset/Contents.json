@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "wardrobe_jacket_denim.png",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}
