@@ -1,5 +1,6 @@
 import SwiftUI
 import SafariServices
+import StoreKit
 
 struct PaywallView: View {
     @Environment(OutfitDataStore.self) private var store
@@ -46,7 +47,10 @@ struct PaywallView: View {
             }
             .appFrame(x: 18, y: layout.featuresY, w: 356, h: layout.featuresHeight, alignment: .topLeading)
 
-            PaywallPlanCard(plan: plan)
+            PaywallPlanCard(
+                plan: plan,
+                storePrice: subscriptionStore.monthlyProduct?.displayPrice
+            )
                 .appFrame(x: 18, y: layout.planCardY, w: 356, h: 70)
 
             AppPrimaryButton(title: subscriptionStore.isProcessing ? "Please Wait" : "Unlock Pro Features", isEnabled: !subscriptionStore.isProcessing) {
@@ -417,6 +421,7 @@ private struct PaywallFeatureIconView: View {
 
 private struct PaywallPlanCard: View {
     let plan: PaywallPlan
+    let storePrice: String?
 
     var body: some View {
         HStack(spacing: 16) {
@@ -429,7 +434,7 @@ private struct PaywallPlanCard: View {
                     Text(plan.originalPrice)
                         .strikethrough(true, color: OutfitTheme.Color.secondaryText)
                     Text("→")
-                    Text(plan.price)
+                    Text(storePrice ?? plan.price)
                 }
                 .font(.outfitBody(12, weight: .regular))
                 .foregroundStyle(OutfitTheme.Color.secondaryText)
