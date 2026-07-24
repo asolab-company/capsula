@@ -1944,7 +1944,9 @@ private struct WardrobeAnalysisPrivacyNote: View {
 
 struct CameraPermissionView: View {
     @Environment(AppRouter.self) private var router
-    @State private var isCameraDenied = false
+    @Environment(\.openURL) private var openURL
+    @Environment(\.scenePhase) private var scenePhase
+    @State private var cameraAuthorizationStatus = AVCaptureDevice.authorizationStatus(for: .video)
     let kind: CaptureKind
 
     var body: some View {
@@ -1968,37 +1970,60 @@ struct CameraPermissionView: View {
                 .lineLimit(2)
                 .appFrame(x: 78, y: 493, w: 236, h: 44)
 
-            if isCameraDenied {
-                Text("Camera access is disabled in Settings.")
+            if needsSettings {
+                Text("Camera access is disabled. Enable it in Settings.")
                     .font(.outfitBody(12, weight: .regular))
                     .foregroundStyle(OutfitTheme.Color.secondaryText)
                     .multilineTextAlignment(.center)
                     .appFrame(x: 58, y: 540, w: 276, h: 18)
             }
 
-            CameraAccessButton(title: "Allow Access") {
+            CameraAccessButton(title: needsSettings ? "Open Settings" : "Allow Access") {
                 Task {
-                    await requestCameraAccess()
+                    await handleCameraAccess()
                 }
             }
             .appFrame(x: 108, y: 565, w: 177, h: 56)
         }
+        .task {
+            refreshCameraStatus()
+        }
+        .onChange(of: scenePhase) { _, newPhase in
+            guard newPhase == .active else { return }
+            refreshCameraStatus()
+        }
     }
 
-    private func requestCameraAccess() async {
-        switch AVCaptureDevice.authorizationStatus(for: .video) {
+    private func handleCameraAccess() async {
+        let status = AVCaptureDevice.authorizationStatus(for: .video)
+        cameraAuthorizationStatus = status
+
+        switch status {
         case .authorized:
             router.replaceLast(with: nextRoute)
         case .notDetermined:
             let granted = await AVCaptureDevice.requestAccess(for: .video)
+            cameraAuthorizationStatus = AVCaptureDevice.authorizationStatus(for: .video)
             if granted {
                 router.replaceLast(with: nextRoute)
-            } else {
-                isCameraDenied = true
             }
-        default:
-            isCameraDenied = true
+        case .denied, .restricted:
+            guard let settingsURL = URL(string: UIApplication.openSettingsURLString) else { return }
+            openURL(settingsURL)
+        @unknown default:
+            break
         }
+    }
+
+    private func refreshCameraStatus() {
+        cameraAuthorizationStatus = AVCaptureDevice.authorizationStatus(for: .video)
+        if cameraAuthorizationStatus == .authorized {
+            router.replaceLast(with: nextRoute)
+        }
+    }
+
+    private var needsSettings: Bool {
+        cameraAuthorizationStatus == .denied || cameraAuthorizationStatus == .restricted
     }
 
     private var subtitle: String {
@@ -2062,6 +2087,8 @@ private struct CameraAccessButton: View {
 struct CameraCaptureView: View {
     @Environment(AppRouter.self) private var router
     @Environment(OutfitDataStore.self) private var store
+    @Environment(\.openURL) private var openURL
+    @Environment(\.scenePhase) private var scenePhase
     @State private var isShowingCamera = false
     @State private var isShowingGalleryPicker = false
     @State private var isCameraDenied = false
@@ -2087,10 +2114,21 @@ struct CameraCaptureView: View {
             if isCameraDenied {
                 AppText(value: "Camera access is disabled in Settings.", role: .body, alignment: .center, color: .white)
                     .appFrame(x: 42, y: 384, w: 308, h: 44)
+
+                CameraAccessButton(title: "Open Settings") {
+                    openCameraSettings()
+                }
+                .appFrame(x: 108, y: 445, w: 177, h: 56)
             }
         }
         .task {
             await requestCameraAccess()
+        }
+        .onChange(of: scenePhase) { _, newPhase in
+            guard newPhase == .active else { return }
+            Task {
+                await requestCameraAccess()
+            }
         }
         .fullScreenCover(isPresented: $isShowingCamera) {
             ZStack(alignment: .bottomTrailing) {
@@ -2154,14 +2192,24 @@ struct CameraCaptureView: View {
     private func requestCameraAccess() async {
         switch AVCaptureDevice.authorizationStatus(for: .video) {
         case .authorized:
+            isCameraDenied = false
             isShowingCamera = true
         case .notDetermined:
             let granted = await AVCaptureDevice.requestAccess(for: .video)
             isCameraDenied = !granted
             isShowingCamera = granted
-        default:
+        case .denied, .restricted:
             isCameraDenied = true
+            isShowingCamera = false
+        @unknown default:
+            isCameraDenied = true
+            isShowingCamera = false
         }
+    }
+
+    private func openCameraSettings() {
+        guard let settingsURL = URL(string: UIApplication.openSettingsURLString) else { return }
+        openURL(settingsURL)
     }
 
     private func openGalleryPicker() {
