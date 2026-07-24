@@ -57,7 +57,7 @@
               "locale" : "en_US"
             }
           ],
-          "productID" : "com.dev.OutFit.pro.monthly",
+          "productID" : "promonthly",
           "recurringSubscriptionPeriod" : "P1M",
           "referenceName" : "OutFit Pro Monthly",
           "subscriptionGroupID" : "OUTFIT-PRO-GROUP",
