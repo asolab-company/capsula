@@ -12,10 +12,14 @@ final class SubscriptionStore {
 
     func loadProducts() async {
         guard monthlyProduct == nil else { return }
+        errorMessage = nil
 
         do {
             let products = try await Product.products(for: AppConstants.Subscriptions.productIDs)
             monthlyProduct = products.first { $0.id == AppConstants.Subscriptions.monthlyProductID }
+            if monthlyProduct == nil {
+                errorMessage = "The subscription could not be loaded from the App Store. Please try again later."
+            }
         } catch {
             errorMessage = error.localizedDescription
         }
