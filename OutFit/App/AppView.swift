@@ -1,8 +1,10 @@
 import SwiftUI
 
 struct AppView: View {
+    @Environment(\.scenePhase) private var scenePhase
     @State private var store = OutfitDataStore()
     @State private var router = AppRouter()
+    @State private var subscriptionStore = SubscriptionStore()
 
     var body: some View {
         @Bindable var router = router
@@ -23,13 +25,28 @@ struct AppView: View {
             PaywallView(plan: .monthly, source: presentation.source)
                 .environment(store)
                 .environment(router)
+                .environment(subscriptionStore)
                 .ignoresSafeArea()
         }
         .environment(store)
         .environment(router)
+        .environment(subscriptionStore)
         .preferredColorScheme(.light)
         .task {
             _ = try? await OpenAIAvatarService().cachedAPIKey()
+        }
+        .task {
+            await subscriptionStore.start()
+            store.hasPremiumAccess = subscriptionStore.hasActiveSubscription
+        }
+        .onChange(of: subscriptionStore.hasActiveSubscription) { _, hasActiveSubscription in
+            store.hasPremiumAccess = hasActiveSubscription
+        }
+        .onChange(of: scenePhase) { _, newPhase in
+            guard newPhase == .active else { return }
+            Task {
+                await subscriptionStore.refreshEntitlements()
+            }
         }
     }
 
@@ -44,8 +61,8 @@ struct AppView: View {
             PaywallView(plan: .monthly, source: .onboarding)
         case .addItemAccess:
             AccessExplainerView(kind: .clothing)
-        case .cameraPermission(let kind):
-            CameraPermissionView(kind: kind)
+        case .cameraSettings(let kind):
+            CameraSettingsView(kind: kind)
         case .cameraCapture(let kind):
             CameraCaptureView(kind: kind)
         case .itemAnalyze:
@@ -90,8 +107,6 @@ struct AppView: View {
             MixAndMatchView()
         case .editProfile:
             EditProfileView()
-        case .profileAccess:
-            CameraPermissionView(kind: .profile)
         case .profileCrop:
             ProfileCropView()
         }
@@ -101,6 +116,7 @@ struct AppView: View {
 struct MainTabShell: View {
     @Environment(OutfitDataStore.self) private var store
     @Environment(AppRouter.self) private var router
+    @Environment(SubscriptionStore.self) private var subscriptionStore
     @Environment(\.smallDeviceAdaptation) private var smallDeviceAdaptation
     @State private var didPresentStartupPaywall = false
 
@@ -146,6 +162,9 @@ struct MainTabShell: View {
         }
         .ignoresSafeArea()
         .task {
+            await subscriptionStore.refreshEntitlements()
+            store.hasPremiumAccess = subscriptionStore.hasActiveSubscription
+
             guard store.didCompleteOnboarding else { return }
             guard !store.hasPremiumAccess else { return }
             guard !didPresentStartupPaywall else { return }

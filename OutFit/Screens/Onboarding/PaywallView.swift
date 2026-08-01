@@ -1,12 +1,11 @@
 import SwiftUI
 import SafariServices
-import StoreKit
 
 struct PaywallView: View {
     @Environment(OutfitDataStore.self) private var store
     @Environment(AppRouter.self) private var router
+    @Environment(SubscriptionStore.self) private var subscriptionStore
     @Environment(\.smallDeviceAdaptation) private var smallDeviceAdaptation
-    @State private var subscriptionStore = SubscriptionStore()
     @State private var legalDocument: AppConstants.Legal.Document?
     @State private var alert: PaywallAlert?
     var plan: PaywallPlan = .monthly
@@ -49,11 +48,12 @@ struct PaywallView: View {
 
             PaywallPlanCard(
                 plan: plan,
-                storePrice: subscriptionStore.monthlyProduct?.displayPrice
+                priceDescription: subscriptionStore.monthlyPriceDescription
+                    ?? (subscriptionStore.isLoadingProducts ? "Loading price…" : "Price unavailable")
             )
                 .appFrame(x: 18, y: layout.planCardY, w: 356, h: 70)
 
-            AppPrimaryButton(title: subscriptionStore.isProcessing ? "Please Wait" : "Unlock Pro Features", isEnabled: !subscriptionStore.isProcessing) {
+            AppPrimaryButton(title: purchaseButtonTitle, isEnabled: canUsePurchaseButton) {
                 Task {
                     await unlockProFeatures()
                 }
@@ -79,9 +79,7 @@ struct PaywallView: View {
         .task {
             await subscriptionStore.loadProducts()
             await subscriptionStore.refreshEntitlements()
-            if subscriptionStore.hasActiveSubscription {
-                store.hasPremiumAccess = true
-            }
+            store.hasPremiumAccess = subscriptionStore.hasActiveSubscription
         }
         .sheet(item: $legalDocument) { document in
             PaywallSafariLegalView(url: document.url)
@@ -98,21 +96,54 @@ struct PaywallView: View {
         }
     }
 
+    private var purchaseButtonTitle: String {
+        if subscriptionStore.isProcessing {
+            return "Please Wait"
+        }
+        if subscriptionStore.isLoadingProducts {
+            return "Loading…"
+        }
+        if subscriptionStore.monthlyProduct == nil {
+            return "Retry"
+        }
+        return "Unlock Pro Features"
+    }
+
+    private var canUsePurchaseButton: Bool {
+        !subscriptionStore.isProcessing && !subscriptionStore.isLoadingProducts
+    }
+
     private func unlockProFeatures() async {
-        if await subscriptionStore.purchaseMonthly() {
+        switch await subscriptionStore.purchaseMonthly() {
+        case .purchased:
             finishPremiumFlow()
-        } else if let errorMessage = subscriptionStore.errorMessage {
-            alert = PaywallAlert(title: "Purchase Failed", message: errorMessage)
+        case .pending:
+            alert = PaywallAlert(
+                title: "Purchase Pending",
+                message: "Your purchase is waiting for approval. Premium will unlock automatically when it completes."
+            )
+        case .cancelled:
+            break
+        case .failed:
+            alert = PaywallAlert(
+                title: "Subscription Unavailable",
+                message: subscriptionStore.errorMessage ?? "The subscription could not be loaded. Please try again."
+            )
         }
     }
 
     private func restorePurchases() async {
-        if await subscriptionStore.restorePurchases() {
+        switch await subscriptionStore.restorePurchases() {
+        case .restored:
             finishPremiumFlow()
-        } else if let errorMessage = subscriptionStore.errorMessage {
-            alert = PaywallAlert(title: "Restore Failed", message: errorMessage)
-        } else {
+        case .noActiveSubscription:
+            store.hasPremiumAccess = false
             alert = PaywallAlert(title: "No Subscription Found", message: "We could not find an active subscription to restore.")
+        case .failed:
+            alert = PaywallAlert(
+                title: "Restore Failed",
+                message: subscriptionStore.errorMessage ?? "Purchases could not be restored. Please try again."
+            )
         }
     }
 
@@ -167,27 +198,6 @@ enum PaywallPlan {
         switch self {
         case .yearly: "Yearly"
         case .monthly: "Monthly"
-        }
-    }
-
-    var price: String {
-        switch self {
-        case .yearly: "USD 49.99"
-        case .monthly: AppConstants.Subscriptions.monthlyDisplayPrice
-        }
-    }
-
-    var originalPrice: String {
-        switch self {
-        case .yearly: "USD 109.99"
-        case .monthly: "USD 12.99"
-        }
-    }
-
-    var badge: String {
-        switch self {
-        case .yearly: "-58%"
-        case .monthly: "-23%"
         }
     }
 }
@@ -421,33 +431,26 @@ private struct PaywallFeatureIconView: View {
 
 private struct PaywallPlanCard: View {
     let plan: PaywallPlan
-    let storePrice: String?
+    let priceDescription: String
 
     var body: some View {
         HStack(spacing: 16) {
-            VStack(alignment: .leading, spacing: 7) {
+            VStack(alignment: .leading, spacing: 4) {
                 Text(plan.title)
                     .font(.outfitBody(14, weight: .bold))
                     .foregroundStyle(Color.black)
 
-                HStack(spacing: 4) {
-                    Text(plan.originalPrice)
-                        .strikethrough(true, color: OutfitTheme.Color.secondaryText)
-                    Text("→")
-                    Text(storePrice ?? plan.price)
-                }
-                .font(.outfitBody(12, weight: .regular))
+                Text(priceDescription)
+                    .font(.outfitBody(13, weight: .semibold))
+                    .foregroundStyle(Color.black)
+
+                Text("Auto-renews monthly until canceled.")
+                    .font(.outfitBody(10, weight: .regular))
                 .foregroundStyle(OutfitTheme.Color.secondaryText)
             }
-            .frame(width: 180, alignment: .leading)
+            .frame(width: 250, alignment: .leading)
 
             Spacer()
-
-            Text(plan.badge)
-                .font(.outfitBody(14, weight: .regular))
-                .foregroundStyle(Color.white)
-                .frame(width: 65, height: 30)
-                .background(OutfitTheme.Color.secondaryText, in: Capsule())
 
             PaywallCheckCircle(size: 24, iconSize: 12)
         }
@@ -525,4 +528,5 @@ private struct PaywallFooterLinks: View {
     PaywallView()
         .environment(OutfitDataStore())
         .environment(AppRouter())
+        .environment(SubscriptionStore())
 }

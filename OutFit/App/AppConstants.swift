@@ -49,7 +49,6 @@ enum AppConstants {
     enum Subscriptions {
         static let monthlyProductID = "promonthly"
         static let productIDs = [monthlyProductID]
-        static let monthlyDisplayPrice = "USD 9.99"
     }
 
     enum OpenAI {

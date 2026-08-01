@@ -80,7 +80,7 @@ struct WardrobeView: View {
             return
         }
         if store.didAcceptWardrobeAnalysis {
-            openClothingCameraOrPermission()
+            openClothingCamera()
         } else {
             router.presentAccess(kind: .clothing)
         }
@@ -94,13 +94,8 @@ struct WardrobeView: View {
         router.push(.wardrobeCollections)
     }
 
-    private func openClothingCameraOrPermission() {
-        switch AVCaptureDevice.authorizationStatus(for: .video) {
-        case .authorized:
-            router.push(.cameraCapture(.clothing))
-        default:
-            router.push(.cameraPermission(.clothing))
-        }
+    private func openClothingCamera() {
+        router.openCamera(for: .clothing)
     }
 }
 
@@ -1718,7 +1713,7 @@ struct AccessExplainerView: View {
 
                     Button {
                         store.didAcceptWardrobeAnalysis = true
-                        openCameraOrPermission()
+                        openCamera()
                     } label: {
                         HStack(spacing: 12) {
                             Circle()
@@ -1784,22 +1779,9 @@ struct AccessExplainerView: View {
         }
     }
 
-    private func openCameraOrPermission() {
+    private func openCamera() {
         router.dismissAccess()
-        switch AVCaptureDevice.authorizationStatus(for: .video) {
-        case .authorized:
-            router.push(nextRoute)
-        default:
-            router.push(.cameraPermission(kind))
-        }
-    }
-
-    private var nextRoute: AppRoute {
-        switch kind {
-        case .clothing: .cameraCapture(.clothing)
-        case .avatar: .avatarCapture
-        case .profile: .cameraCapture(.profile)
-        }
+        router.openCamera(for: kind)
     }
 
     private func dismissSheet() {
@@ -1942,7 +1924,7 @@ private struct WardrobeAnalysisPrivacyNote: View {
     }
 }
 
-struct CameraPermissionView: View {
+struct CameraSettingsView: View {
     @Environment(AppRouter.self) private var router
     @Environment(\.openURL) private var openURL
     @Environment(\.scenePhase) private var scenePhase
@@ -1951,13 +1933,13 @@ struct CameraPermissionView: View {
 
     var body: some View {
         AppCanvas {
-            ProvideAccessTopBar()
+            CameraAccessTopBar()
                 .appFrame(x: 18, y: 70, w: 356, h: 40, alignment: .topLeading)
 
             AppIcon(name: "app_ic_camera", size: 142, color: Color(hex: 0x858585))
                 .appFrame(x: 124, y: 300, w: 145, h: 120)
 
-            Text("Camera Access Needed")
+            Text("Camera Access Is Off")
                 .font(.outfitBody(24, weight: .bold))
                 .foregroundStyle(Color.black)
                 .multilineTextAlignment(.center)
@@ -1967,23 +1949,19 @@ struct CameraPermissionView: View {
                 .font(.outfitBody(14, weight: .medium))
                 .foregroundStyle(Color.black)
                 .multilineTextAlignment(.center)
-                .lineLimit(2)
-                .appFrame(x: 78, y: 493, w: 236, h: 44)
+                .lineLimit(3)
+                .appFrame(x: 58, y: 490, w: 276, h: 54)
 
-            if needsSettings {
-                Text("Camera access is disabled. Enable it in Settings.")
-                    .font(.outfitBody(12, weight: .regular))
-                    .foregroundStyle(OutfitTheme.Color.secondaryText)
-                    .multilineTextAlignment(.center)
-                    .appFrame(x: 58, y: 540, w: 276, h: 18)
-            }
+            Text(settingsHint)
+                .font(.outfitBody(12, weight: .regular))
+                .foregroundStyle(OutfitTheme.Color.secondaryText)
+                .multilineTextAlignment(.center)
+                .appFrame(x: 48, y: 546, w: 296, h: 36)
 
-            CameraAccessButton(title: needsSettings ? "Open Settings" : "Allow Access") {
-                Task {
-                    await handleCameraAccess()
-                }
+            CameraAccessButton(title: "Open Settings") {
+                openCameraSettings()
             }
-            .appFrame(x: 108, y: 565, w: 177, h: 56)
+            .appFrame(x: 108, y: 600, w: 177, h: 56)
         }
         .task {
             refreshCameraStatus()
@@ -1994,59 +1972,39 @@ struct CameraPermissionView: View {
         }
     }
 
-    private func handleCameraAccess() async {
-        let status = AVCaptureDevice.authorizationStatus(for: .video)
-        cameraAuthorizationStatus = status
-
-        switch status {
-        case .authorized:
-            router.replaceLast(with: nextRoute)
-        case .notDetermined:
-            let granted = await AVCaptureDevice.requestAccess(for: .video)
-            cameraAuthorizationStatus = AVCaptureDevice.authorizationStatus(for: .video)
-            if granted {
-                router.replaceLast(with: nextRoute)
-            }
-        case .denied, .restricted:
-            guard let settingsURL = URL(string: UIApplication.openSettingsURLString) else { return }
-            openURL(settingsURL)
-        @unknown default:
-            break
-        }
+    private func openCameraSettings() {
+        guard let settingsURL = URL(string: UIApplication.openSettingsURLString) else { return }
+        openURL(settingsURL)
     }
 
     private func refreshCameraStatus() {
         cameraAuthorizationStatus = AVCaptureDevice.authorizationStatus(for: .video)
         if cameraAuthorizationStatus == .authorized {
-            router.replaceLast(with: nextRoute)
+            router.replaceLast(with: kind.captureRoute)
         }
-    }
-
-    private var needsSettings: Bool {
-        cameraAuthorizationStatus == .denied || cameraAuthorizationStatus == .restricted
     }
 
     private var subtitle: String {
         switch kind {
         case .clothing:
-            "Take photos of your clothes to build your wardrobe."
+            "To photograph clothes for your wardrobe, enable camera access in Settings."
         case .avatar:
-            "Enable camera access to capture your avatar photo."
+            "To take a photo for your avatar, enable camera access in Settings."
         case .profile:
-            "Enable camera access to capture your profile picture."
+            "To take a profile photo, enable camera access in Settings."
         }
     }
 
-    private var nextRoute: AppRoute {
-        switch kind {
-        case .clothing: .cameraCapture(.clothing)
-        case .avatar: .avatarCapture
-        case .profile: .cameraCapture(.profile)
+    private var settingsHint: String {
+        if cameraAuthorizationStatus == .restricted {
+            "Camera access is restricted by this device’s settings."
+        } else {
+            "In Settings, turn on Camera access for Capsula."
         }
     }
 }
 
-private struct ProvideAccessTopBar: View {
+private struct CameraAccessTopBar: View {
     @Environment(AppRouter.self) private var router
 
     var body: some View {
@@ -2058,7 +2016,7 @@ private struct ProvideAccessTopBar: View {
                     _ = router.path.popLast()
                 }
             }
-            Text("Provide Access")
+            Text("Camera Access")
                 .font(.outfitBody(20, weight: .bold))
                 .foregroundStyle(Color.black)
                 .lineLimit(1)
@@ -2087,11 +2045,9 @@ private struct CameraAccessButton: View {
 struct CameraCaptureView: View {
     @Environment(AppRouter.self) private var router
     @Environment(OutfitDataStore.self) private var store
-    @Environment(\.openURL) private var openURL
     @Environment(\.scenePhase) private var scenePhase
     @State private var isShowingCamera = false
     @State private var isShowingGalleryPicker = false
-    @State private var isCameraDenied = false
     let kind: CaptureKind
 
     var body: some View {
@@ -2110,16 +2066,6 @@ struct CameraCaptureView: View {
         AppCanvas {
             Color.black
                 .appFrame(x: 0, y: 0, w: 393, h: 852)
-
-            if isCameraDenied {
-                AppText(value: "Camera access is disabled in Settings.", role: .body, alignment: .center, color: .white)
-                    .appFrame(x: 42, y: 384, w: 308, h: 44)
-
-                CameraAccessButton(title: "Open Settings") {
-                    openCameraSettings()
-                }
-                .appFrame(x: 108, y: 445, w: 177, h: 56)
-            }
         }
         .task {
             await requestCameraAccess()
@@ -2192,24 +2138,26 @@ struct CameraCaptureView: View {
     private func requestCameraAccess() async {
         switch AVCaptureDevice.authorizationStatus(for: .video) {
         case .authorized:
-            isCameraDenied = false
             isShowingCamera = true
         case .notDetermined:
             let granted = await AVCaptureDevice.requestAccess(for: .video)
-            isCameraDenied = !granted
-            isShowingCamera = granted
+            if granted {
+                isShowingCamera = true
+            } else {
+                showCameraSettings()
+            }
         case .denied, .restricted:
-            isCameraDenied = true
-            isShowingCamera = false
+            showCameraSettings()
         @unknown default:
-            isCameraDenied = true
-            isShowingCamera = false
+            showCameraSettings()
         }
     }
 
-    private func openCameraSettings() {
-        guard let settingsURL = URL(string: UIApplication.openSettingsURLString) else { return }
-        openURL(settingsURL)
+    private func showCameraSettings() {
+        isShowingCamera = false
+        if router.path.last == kind.captureRoute {
+            router.replaceLast(with: .cameraSettings(kind))
+        }
     }
 
     private func openGalleryPicker() {

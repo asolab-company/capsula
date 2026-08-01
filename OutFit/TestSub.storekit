@@ -36,7 +36,7 @@
       "localizations" : [
 
       ],
-      "name" : "OutFit Pro",
+      "name" : "Capsula Pro",
       "subscriptions" : [
         {
           "adHocOffers" : [
@@ -52,14 +52,14 @@
           "introductoryOffer" : null,
           "localizations" : [
             {
-              "description" : "Monthly access to OutFit Pro features.",
-              "displayName" : "OutFit Pro Monthly",
+              "description" : "Monthly access to Capsula Pro features.",
+              "displayName" : "Capsula Pro Monthly",
               "locale" : "en_US"
             }
           ],
           "productID" : "promonthly",
           "recurringSubscriptionPeriod" : "P1M",
-          "referenceName" : "OutFit Pro Monthly",
+          "referenceName" : "Capsula Pro Monthly",
           "subscriptionGroupID" : "OUTFIT-PRO-GROUP",
           "type" : "RecurringSubscription",
           "winbackOffers" : [

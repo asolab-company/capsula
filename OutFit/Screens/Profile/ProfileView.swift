@@ -1,4 +1,3 @@
-import AVFoundation
 import SafariServices
 import SwiftUI
 import UIKit
@@ -6,9 +5,9 @@ import UIKit
 struct ProfileView: View {
     @Environment(OutfitDataStore.self) private var store
     @Environment(AppRouter.self) private var router
+    @Environment(SubscriptionStore.self) private var subscriptionStore
     @Environment(\.openURL) private var openURL
     @Environment(\.smallDeviceAdaptation) private var smallDeviceAdaptation
-    @State private var subscriptionStore = SubscriptionStore()
     @State private var legalDocument: AppConstants.Legal.Document?
     @State private var isSharePresented = false
     @State private var alert: ProfileAlert?
@@ -146,13 +145,18 @@ struct ProfileView: View {
     }
 
     private func restorePurchases() async {
-        if await subscriptionStore.restorePurchases() {
+        switch await subscriptionStore.restorePurchases() {
+        case .restored:
             store.hasPremiumAccess = true
             alert = ProfileAlert(title: "Restored", message: "Your subscription has been restored.")
-        } else if let errorMessage = subscriptionStore.errorMessage {
-            alert = ProfileAlert(title: "Restore Failed", message: errorMessage)
-        } else {
+        case .noActiveSubscription:
+            store.hasPremiumAccess = false
             alert = ProfileAlert(title: "No Subscription Found", message: "We could not find an active subscription to restore.")
+        case .failed:
+            alert = ProfileAlert(
+                title: "Restore Failed",
+                message: subscriptionStore.errorMessage ?? "Purchases could not be restored. Please try again."
+            )
         }
     }
 
@@ -163,12 +167,7 @@ struct ProfileView: View {
     }
 
     private func openProfileCameraFlow() {
-        switch AVCaptureDevice.authorizationStatus(for: .video) {
-        case .authorized:
-            router.push(.cameraCapture(.profile))
-        default:
-            router.push(.profileAccess)
-        }
+        router.openCamera(for: .profile)
     }
 }
 
@@ -529,12 +528,7 @@ struct EditProfileView: View {
     }
 
     private func openProfileCameraFlow() {
-        switch AVCaptureDevice.authorizationStatus(for: .video) {
-        case .authorized:
-            router.push(.cameraCapture(.profile))
-        default:
-            router.push(.profileAccess)
-        }
+        router.openCamera(for: .profile)
     }
 
     private func togglePicker(_ picker: EditProfilePicker) {
@@ -1057,4 +1051,5 @@ private struct CropRetakeButton: View {
     ProfileView()
         .environment(OutfitDataStore())
         .environment(AppRouter())
+        .environment(SubscriptionStore())
 }

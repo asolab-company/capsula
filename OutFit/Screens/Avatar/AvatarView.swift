@@ -1,4 +1,3 @@
-import AVFoundation
 import Combine
 import Photos
 import SwiftUI
@@ -79,12 +78,7 @@ private struct AvatarLibraryView: View {
             router.presentPaywall(source: .inApp)
             return
         }
-        switch AVCaptureDevice.authorizationStatus(for: .video) {
-        case .authorized:
-            router.push(.avatarCapture)
-        default:
-            router.push(.cameraPermission(.avatar))
-        }
+        router.openCamera(for: .avatar)
     }
 }
 
@@ -372,12 +366,7 @@ struct MixMatchOnboardingView: View {
             router.presentPaywall(source: .inApp)
             return
         }
-        switch AVCaptureDevice.authorizationStatus(for: .video) {
-        case .authorized:
-            router.push(.avatarCapture)
-        default:
-            router.push(.cameraPermission(.avatar))
-        }
+        router.openCamera(for: .avatar)
     }
 
     private var heroAsset: String {
@@ -545,12 +534,7 @@ struct AvatarEditorView: View {
         if router.path.last == .avatarEditor {
             router.pop()
         }
-        switch AVCaptureDevice.authorizationStatus(for: .video) {
-        case .authorized:
-            router.push(.avatarCapture)
-        default:
-            router.push(.cameraPermission(.avatar))
-        }
+        router.openCamera(for: .avatar)
     }
 
     private func startAvatarGeneration(canvasHeight: CGFloat) {

@@ -1,3 +1,4 @@
+import AVFoundation
 import SwiftUI
 
 enum AppTab: String, CaseIterable, Identifiable, Hashable {
@@ -35,7 +36,7 @@ enum AppRoute: Hashable {
     case premiumPaywall
     case monthlyPaywall
     case addItemAccess
-    case cameraPermission(CaptureKind)
+    case cameraSettings(CaptureKind)
     case cameraCapture(CaptureKind)
     case itemAnalyze
     case itemProcessing
@@ -58,7 +59,6 @@ enum AppRoute: Hashable {
     case avatarDetail(AvatarProfile)
     case mixAndMatch
     case editProfile
-    case profileAccess
     case profileCrop
 }
 
@@ -110,6 +110,17 @@ final class AppRouter {
         accessPresentation = AccessPresentation(kind: kind)
     }
 
+    func openCamera(for kind: CaptureKind) {
+        switch AVCaptureDevice.authorizationStatus(for: .video) {
+        case .denied, .restricted:
+            push(.cameraSettings(kind))
+        case .authorized, .notDetermined:
+            push(kind.captureRoute)
+        @unknown default:
+            push(.cameraSettings(kind))
+        }
+    }
+
     func dismissAccess() {
         accessPresentation = nil
     }
@@ -121,5 +132,16 @@ final class AppRouter {
 
     func popToRoot() {
         path.removeAll()
+    }
+}
+
+extension CaptureKind {
+    var captureRoute: AppRoute {
+        switch self {
+        case .clothing, .profile:
+            .cameraCapture(self)
+        case .avatar:
+            .avatarCapture
+        }
     }
 }

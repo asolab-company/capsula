@@ -10,9 +10,22 @@
 		9CFED5B92FD09068004876ED /* OutFit.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OutFit.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		A1C4A5B62FD09068004876ED /* Exceptions for "OutFit" folder in "OutFit" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				TestSub.storekit,
+			);
+			target = 9CFED5B82FD09068004876ED /* OutFit */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		9CFED5BB2FD09068004876ED /* OutFit */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				A1C4A5B62FD09068004876ED /* Exceptions for "OutFit" folder in "OutFit" target */,
+			);
 			path = OutFit;
 			sourceTree = "<group>";
 		};
@@ -82,6 +95,11 @@
 				TargetAttributes = {
 					9CFED5B82FD09068004876ED = {
 						CreatedOnToolsVersion = 26.5;
+						SystemCapabilities = {
+							com.apple.InAppPurchase = {
+								enabled = 1;
+							};
+						};
 					};
 				};
 			};
@@ -246,12 +264,12 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = OutFit/OutFit.entitlements;
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Capsula;
-				INFOPLIST_KEY_NSCameraUsageDescription = "Capsula needs camera access to take your profile photo.";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Capsula uses the camera to take photos for your wardrobe, avatar, and profile.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Capsula uses your location to show local weather for outfit planning.";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Capsula needs photo library access to save your generated looks.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Capsula needs photo library access so you can choose a profile photo.";
@@ -296,12 +314,12 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = OutFit/OutFit.entitlements;
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = Capsula;
-				INFOPLIST_KEY_NSCameraUsageDescription = "Capsula needs camera access to take your profile photo.";
+				INFOPLIST_KEY_NSCameraUsageDescription = "Capsula uses the camera to take photos for your wardrobe, avatar, and profile.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Capsula uses your location to show local weather for outfit planning.";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Capsula needs photo library access to save your generated looks.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Capsula needs photo library access so you can choose a profile photo.";

@@ -1,4 +1,3 @@
-import AVFoundation
 import SwiftUI
 import UIKit
 
@@ -195,12 +194,7 @@ struct HomeView: View {
             return
         }
         if store.didAcceptWardrobeAnalysis {
-            switch AVCaptureDevice.authorizationStatus(for: .video) {
-            case .authorized:
-                router.push(.cameraCapture(.clothing))
-            default:
-                router.push(.cameraPermission(.clothing))
-            }
+            router.openCamera(for: .clothing)
         } else {
             router.presentAccess(kind: .clothing)
         }
