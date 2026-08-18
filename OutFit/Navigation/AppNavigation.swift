@@ -112,12 +112,10 @@ final class AppRouter {
 
     func openCamera(for kind: CaptureKind) {
         switch AVCaptureDevice.authorizationStatus(for: .video) {
-        case .denied, .restricted:
-            push(.cameraSettings(kind))
-        case .authorized, .notDetermined:
+        case .authorized, .notDetermined, .denied, .restricted:
             push(kind.captureRoute)
         @unknown default:
-            push(.cameraSettings(kind))
+            push(kind.captureRoute)
         }
     }
 

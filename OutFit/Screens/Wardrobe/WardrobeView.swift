@@ -2045,9 +2045,10 @@ private struct CameraAccessButton: View {
 struct CameraCaptureView: View {
     @Environment(AppRouter.self) private var router
     @Environment(OutfitDataStore.self) private var store
-    @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.openURL) private var openURL
     @State private var isShowingCamera = false
     @State private var isShowingGalleryPicker = false
+    @State private var cameraAccessAlert: CameraAccessAlert?
     let kind: CaptureKind
 
     var body: some View {
@@ -2069,12 +2070,6 @@ struct CameraCaptureView: View {
         }
         .task {
             await requestCameraAccess()
-        }
-        .onChange(of: scenePhase) { _, newPhase in
-            guard newPhase == .active else { return }
-            Task {
-                await requestCameraAccess()
-            }
         }
         .fullScreenCover(isPresented: $isShowingCamera) {
             ZStack(alignment: .bottomTrailing) {
@@ -2102,6 +2097,29 @@ struct CameraCaptureView: View {
                 router.pop()
             })
             .ignoresSafeArea()
+        }
+        .alert(item: $cameraAccessAlert) { alert in
+            switch alert {
+            case .denied:
+                Alert(
+                    title: Text("Camera Access Is Off"),
+                    message: Text("Allow camera access in Settings to take photos."),
+                    primaryButton: .cancel(Text("Cancel")) {
+                        router.pop()
+                    },
+                    secondaryButton: .default(Text("Open Settings")) {
+                        openCameraSettings()
+                    }
+                )
+            case .restricted:
+                Alert(
+                    title: Text("Camera Access Is Restricted"),
+                    message: Text("Camera access is restricted by this device and can’t be changed from the app."),
+                    dismissButton: .default(Text("OK")) {
+                        router.pop()
+                    }
+                )
+            }
         }
     }
 
@@ -2144,20 +2162,22 @@ struct CameraCaptureView: View {
             if granted {
                 isShowingCamera = true
             } else {
-                showCameraSettings()
+                router.pop()
             }
-        case .denied, .restricted:
-            showCameraSettings()
+        case .denied:
+            cameraAccessAlert = .denied
+        case .restricted:
+            cameraAccessAlert = .restricted
         @unknown default:
-            showCameraSettings()
+            cameraAccessAlert = .restricted
         }
     }
 
-    private func showCameraSettings() {
+    private func openCameraSettings() {
         isShowingCamera = false
-        if router.path.last == kind.captureRoute {
-            router.replaceLast(with: .cameraSettings(kind))
-        }
+        router.pop()
+        guard let settingsURL = URL(string: UIApplication.openSettingsURLString) else { return }
+        openURL(settingsURL)
     }
 
     private func openGalleryPicker() {
@@ -2200,6 +2220,13 @@ struct CameraCaptureView: View {
             }
         }
     }
+}
+
+private enum CameraAccessAlert: Identifiable {
+    case denied
+    case restricted
+
+    var id: Self { self }
 }
 
 private struct CameraGalleryOverlayButton: View {

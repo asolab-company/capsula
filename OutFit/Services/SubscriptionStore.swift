@@ -1,6 +1,5 @@
 import Foundation
 import Observation
-import OSLog
 import StoreKit
 
 enum SubscriptionPurchaseOutcome {
@@ -25,10 +24,6 @@ final class SubscriptionStore {
     private(set) var isProcessing = false
     var errorMessage: String?
 
-    @ObservationIgnored private let logger = Logger(
-        subsystem: Bundle.main.bundleIdentifier ?? "com.capsula.wardrobe",
-        category: "StoreKit"
-    )
     @ObservationIgnored private var transactionUpdatesTask: Task<Void, Never>?
 
     var monthlyPriceDescription: String? {
@@ -57,19 +52,11 @@ final class SubscriptionStore {
             monthlyProduct = products.first { $0.id == AppConstants.Subscriptions.monthlyProductID }
 
             guard monthlyProduct != nil else {
-                logger.error(
-                    "App Store returned no matching subscription. Requested: \(requestedIDs.joined(separator: ","), privacy: .public); returned: \(products.map(\.id).joined(separator: ","), privacy: .public)"
-                )
                 errorMessage = "We couldn’t load subscription options from the App Store. Please check your connection and try again."
                 return
             }
-
-            logger.info(
-                "Loaded subscription \(AppConstants.Subscriptions.monthlyProductID, privacy: .public)."
-            )
         } catch {
             monthlyProduct = nil
-            logger.error("Product loading failed: \(error.localizedDescription, privacy: .public)")
             errorMessage = "We couldn’t connect to the App Store. Please check your connection and try again."
         }
     }
@@ -107,8 +94,6 @@ final class SubscriptionStore {
                     return .failed
                 }
 
-                // A verified transaction is authoritative. currentEntitlements can briefly
-                // lag immediately after the purchase finishes.
                 if !hasActiveSubscription {
                     hasActiveSubscription = true
                 }
@@ -125,7 +110,6 @@ final class SubscriptionStore {
                 return .failed
             }
         } catch {
-            logger.error("Purchase failed: \(error.localizedDescription, privacy: .public)")
             errorMessage = error.localizedDescription
             return .failed
         }
@@ -143,7 +127,6 @@ final class SubscriptionStore {
             await refreshEntitlements()
             return hasActiveSubscription ? .restored : .noActiveSubscription
         } catch {
-            logger.error("Restore failed: \(error.localizedDescription, privacy: .public)")
             errorMessage = error.localizedDescription
             return .failed
         }
@@ -161,7 +144,6 @@ final class SubscriptionStore {
         }
 
         hasActiveSubscription = isActive
-        logger.info("Premium entitlement active: \(isActive, privacy: .public)")
     }
 
     private func isActiveSubscription(_ transaction: Transaction) -> Bool {
@@ -184,11 +166,8 @@ final class SubscriptionStore {
             for await verification in Transaction.updates {
                 guard let self else { return }
 
-                do {
-                    let transaction = try self.checkVerified(verification)
+                if let transaction = try? self.checkVerified(verification) {
                     await transaction.finish()
-                } catch {
-                    self.logger.error("Transaction verification failed: \(error.localizedDescription, privacy: .public)")
                 }
 
                 await self.refreshEntitlements()
