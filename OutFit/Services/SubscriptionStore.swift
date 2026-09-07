@@ -1,5 +1,7 @@
+/* SUBSCRIPTIONS_DISABLED_V1 — preserved for restoring subscriptions.
 import Foundation
 import Observation
+import OSLog
 import StoreKit
 
 enum SubscriptionPurchaseOutcome {
@@ -24,7 +26,20 @@ final class SubscriptionStore {
     private(set) var isProcessing = false
     var errorMessage: String?
 
+    @ObservationIgnored private var productLoadingTask: Task<Void, Never>?
+    @ObservationIgnored private let logger = Logger(subsystem: "com.capsula.wardrobe", category: "Subscriptions")
     @ObservationIgnored private var transactionUpdatesTask: Task<Void, Never>?
+
+    @ObservationIgnored private let fetchProducts: ([String]) async throws -> [Product]
+    @ObservationIgnored private let retryDelay: () async throws -> Void
+
+    init(
+        fetchProducts: @escaping ([String]) async throws -> [Product] = { try await Product.products(for: $0) },
+        retryDelay: @escaping () async throws -> Void = { try await Task.sleep(for: .seconds(1)) }
+    ) {
+        self.fetchProducts = fetchProducts
+        self.retryDelay = retryDelay
+    }
 
     var monthlyPriceDescription: String? {
         monthlyProduct.map { "\($0.displayPrice) / month" }
@@ -37,28 +52,54 @@ final class SubscriptionStore {
     }
 
     func loadProducts(forceReload: Bool = false) async {
-        guard !isLoadingProducts else { return }
-        if monthlyProduct != nil, !forceReload {
+        // App startup and the paywall share the same request, and both await its result.
+        if let productLoadingTask {
+            await productLoadingTask.value
             return
         }
+        guard monthlyProduct == nil || forceReload else { return }
 
         isLoadingProducts = true
         errorMessage = nil
-        defer { isLoadingProducts = false }
-
-        do {
-            let requestedIDs = AppConstants.Subscriptions.productIDs
-            let products = try await Product.products(for: requestedIDs)
-            monthlyProduct = products.first { $0.id == AppConstants.Subscriptions.monthlyProductID }
-
-            guard monthlyProduct != nil else {
-                errorMessage = "We couldn’t load subscription options from the App Store. Please check your connection and try again."
-                return
+        let task = Task {
+            defer {
+                isLoadingProducts = false
+                productLoadingTask = nil
             }
-        } catch {
-            monthlyProduct = nil
-            errorMessage = "We couldn’t connect to the App Store. Please check your connection and try again."
+            await fetchProductsWithRetry()
         }
+        productLoadingTask = task
+        await task.value
+    }
+
+    private func fetchProductsWithRetry() async {
+        let requestedIDs = AppConstants.Subscriptions.productIDs
+        for attempt in 1...3 {
+            do {
+                let products = try await fetchProducts(requestedIDs)
+                if let product = products.first(where: {
+                    $0.id == AppConstants.Subscriptions.monthlyProductID &&
+                    $0.type == .autoRenewable &&
+                    $0.subscription?.subscriptionPeriod.unit == .month &&
+                    $0.subscription?.subscriptionPeriod.value == 1
+                }) {
+                    monthlyProduct = product
+                    errorMessage = nil
+                    return
+                }
+                logger.error("Monthly product unavailable. Attempt \(attempt); bundle: \(Bundle.main.bundleIdentifier ?? "unknown", privacy: .public); requested: \(requestedIDs.joined(separator: ","), privacy: .public); returned: \(products.map(\.id).joined(separator: ","), privacy: .public)")
+            } catch is CancellationError {
+                return
+            } catch {
+                logger.error("StoreKit product request failed on attempt \(attempt): \(String(describing: error), privacy: .public)")
+            }
+
+            if attempt < 3 {
+                do { try await retryDelay() }
+                catch { return }
+            }
+        }
+        errorMessage = "We couldn’t load the subscription price from the App Store. Please try again in a moment."
     }
 
     func purchaseMonthly() async -> SubscriptionPurchaseOutcome {
@@ -67,10 +108,6 @@ final class SubscriptionStore {
         isProcessing = true
         errorMessage = nil
         defer { isProcessing = false }
-
-        if monthlyProduct == nil {
-            await loadProducts(forceReload: true)
-        }
 
         guard let monthlyProduct else {
             if errorMessage == nil {
@@ -195,3 +232,5 @@ private enum SubscriptionPurchaseError: LocalizedError {
         }
     }
 }
+
+*/

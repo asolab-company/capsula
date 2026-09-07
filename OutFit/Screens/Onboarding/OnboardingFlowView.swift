@@ -64,7 +64,9 @@ struct OnboardingFlowView: View {
                     } else {
                         store.profile.name = normalizedName
                         store.didCompleteOnboarding = true
+/* SUBSCRIPTIONS_DISABLED_V1 — preserved for restoring subscriptions.
                         router.presentPaywall(source: .onboarding)
+*/
                     }
                 }
                 .appFrame(x: 18, y: layout.y(703), w: 356, h: 56)

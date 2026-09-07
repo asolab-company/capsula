@@ -5,7 +5,9 @@ import UIKit
 struct ProfileView: View {
     @Environment(OutfitDataStore.self) private var store
     @Environment(AppRouter.self) private var router
+/* SUBSCRIPTIONS_DISABLED_V1 — preserved for restoring subscriptions.
     @Environment(SubscriptionStore.self) private var subscriptionStore
+*/
     @Environment(\.openURL) private var openURL
     @Environment(\.smallDeviceAdaptation) private var smallDeviceAdaptation
     @State private var legalDocument: AppConstants.Legal.Document?
@@ -30,12 +32,14 @@ struct ProfileView: View {
                     let restoreOffset: CGFloat = isPremium ? -80 : 0
                     let compactPremiumGap = smallDeviceAdaptation.value(regular: CGFloat(0), small: isPremium ? 0 : 28)
 
+/* SUBSCRIPTIONS_DISABLED_V1 — preserved for restoring subscriptions.
                     if !isPremium {
                         ProfilePremiumButton {
                             router.presentPaywall(source: .inApp)
                         }
                         .appFrame(x: 18, y: 0, w: 357, h: 58)
                     }
+*/
 
                     ProfileSectionHeader(title: "Profile", actionTitle: "Edit", iconName: "app_ic_edit") {
                         router.push(.editProfile)
@@ -100,6 +104,7 @@ struct ProfileView: View {
                     }
                         .appFrame(x: 18, y: 671 + premiumOffset + compactPremiumGap, w: 357, h: 70)
 
+/* SUBSCRIPTIONS_DISABLED_V1 — preserved for restoring subscriptions.
                     if !isPremium {
                         ProfileSettingsRow(title: AppConstants.Profile.restoreTitle, iconName: "app_ic_set04") {
                             Task {
@@ -108,6 +113,7 @@ struct ProfileView: View {
                         }
                             .appFrame(x: 18, y: 751 + premiumOffset + compactPremiumGap, w: 357, h: 70)
                     }
+*/
 
                     ProfileSettingsRow(title: AppConstants.Profile.deleteDataTitle, iconName: "app_ic_set01", iconColor: Color(hex: 0xFF4B4B)) {
                         deleteAllData()
@@ -144,6 +150,7 @@ struct ProfileView: View {
         }
     }
 
+/* SUBSCRIPTIONS_DISABLED_V1 — preserved for restoring subscriptions.
     private func restorePurchases() async {
         switch await subscriptionStore.restorePurchases() {
         case .restored:
@@ -159,6 +166,7 @@ struct ProfileView: View {
             )
         }
     }
+*/
 
     private func deleteAllData() {
         router.selectedTab = .home
@@ -171,6 +179,7 @@ struct ProfileView: View {
     }
 }
 
+/* SUBSCRIPTIONS_DISABLED_V1 — preserved for restoring subscriptions.
 private struct ProfilePremiumButton: View {
     let action: () -> Void
 
@@ -188,6 +197,7 @@ private struct ProfilePremiumButton: View {
         .buttonStyle(.plain)
     }
 }
+*/
 
 private struct ProfileSectionHeader: View {
     let title: String
@@ -1051,5 +1061,7 @@ private struct CropRetakeButton: View {
     ProfileView()
         .environment(OutfitDataStore())
         .environment(AppRouter())
+/* SUBSCRIPTIONS_DISABLED_V1 — preserved for restoring subscriptions.
         .environment(SubscriptionStore())
+*/
 }

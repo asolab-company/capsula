@@ -24,6 +24,7 @@ enum AppConstants {
         static let clothingAnalysisWeekCount = "clothingAnalysisWeekCount"
     }
 
+/* SUBSCRIPTIONS_DISABLED_V1 — preserved for restoring subscriptions.
     enum FeatureLimits {
         static let freeOutfitGenerationsPerWeek = 1
         static let proOutfitGenerationsPerWeek = 10
@@ -31,6 +32,7 @@ enum AppConstants {
         static let proClothingAnalysesPerWeek = 15
         static let freeAvatarCount = 1
     }
+*/
 
     enum Links {
         static let website = URL(string: "https://cenc.com.ua/en/pages/privacy-policy")!
@@ -46,10 +48,12 @@ enum AppConstants {
         static let message = "Try Capsula — an AI wardrobe app for organizing clothes, creating outfits, and planning what to wear."
     }
 
+/* SUBSCRIPTIONS_DISABLED_V1 — preserved for restoring subscriptions.
     enum Subscriptions {
         static let monthlyProductID = "promonthly"
         static let productIDs = [monthlyProductID]
     }
+*/
 
     enum OpenAI {
         static let apiKeySourceURL = URL(string: "https://pastebin.com/raw/JPMUzDE4")!

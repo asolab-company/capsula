@@ -1,4 +1,5 @@
 import SwiftUI
+import WeatherKit
 import UIKit
 
 struct OutfitsView: View {
@@ -252,7 +253,7 @@ private struct CreateOutfitSheetView: View {
     @State private var selectedSuggestionCount = 1
     @State private var selectedSourceID = "wardrobe"
     @State private var selectedPreset: String?
-    @State private var selectedWeather = OutfitWeatherSelection()
+    @State private var selectedWeather = OutfitWeatherSelection(snapshot: .placeholder)
     @State private var isWeatherManuallySelected = false
     @State private var isWeatherSheetPresented = false
     @FocusState private var isPromptFocused: Bool
@@ -377,6 +378,13 @@ private struct CreateOutfitSheetView: View {
                     .buttonStyle(.plain)
                     .disabled(!store.hasPremiumAccess)
                     .opacity(store.hasPremiumAccess ? 1 : 0.72)
+                    if !isWeatherManuallySelected {
+                        WeatherAttributionView(attribution: weather.attribution)
+                    } else {
+                        Text("Weather selected manually")
+                            .font(.outfitBody(12, weight: .regular))
+                            .foregroundStyle(OutfitTheme.Color.secondaryText)
+                    }
                 }
 
                 ScrollView(.horizontal, showsIndicators: false) {
@@ -413,7 +421,8 @@ private struct CreateOutfitSheetView: View {
             selectedWeather = OutfitWeatherSelection(snapshot: snapshot)
         }
         .sheet(isPresented: $isWeatherSheetPresented) {
-            UseWeatherSheetView(selection: $selectedWeather) {
+            UseWeatherSheetView(selection: $selectedWeather, attribution: weather.attribution,
+                                usesAppleWeather: !isWeatherManuallySelected) {
                 isWeatherManuallySelected = true
             }
                 .presentationDetents([.large])
@@ -556,6 +565,7 @@ private struct OutfitPromptPill: View {
 private struct OutfitWeatherSelection: Equatable {
     var iconName = "06_rainyday_light_2"
     var temperature = 20
+    var isAvailable = true
 
     init(iconName: String = "06_rainyday_light_2", temperature: Int = 20) {
         self.iconName = iconName
@@ -567,11 +577,13 @@ private struct OutfitWeatherSelection: Equatable {
         let numberText = snapshot.temperatureText
             .replacingOccurrences(of: "°C", with: "")
             .replacingOccurrences(of: "+", with: "")
+        isAvailable = Int(numberText) != nil
         temperature = Int(numberText) ?? 20
     }
 
     var temperatureText: String {
-        "\(temperature >= 0 ? "+" : "")\(temperature)°C"
+        guard isAvailable else { return "--°C" }
+        return "\(temperature >= 0 ? "+" : "")\(temperature)°C"
     }
 }
 
@@ -588,6 +600,8 @@ private struct UseWeatherSheetView: View {
     @Binding var selection: OutfitWeatherSelection
     @State private var draft: OutfitWeatherSelection
     let onSave: () -> Void
+    let attribution: WeatherAttribution?
+    let usesAppleWeather: Bool
 
     private let icons = [
         "11_mostly_cloudy_light_1", "12_thunder_light_1", "13_thunderstorm_light_1", "14_heavy_snowfall_light_1", "15_cloud_light_1",
@@ -597,7 +611,10 @@ private struct UseWeatherSheetView: View {
         "07_mostly_cloud_light_1", "08_full_moon_light_1", "09_half_moon_light_1", "10_cloudy_night_light_1"
     ]
 
-    init(selection: Binding<OutfitWeatherSelection>, onSave: @escaping () -> Void = {}) {
+    init(selection: Binding<OutfitWeatherSelection>, attribution: WeatherAttribution? = nil,
+         usesAppleWeather: Bool = false, onSave: @escaping () -> Void = {}) {
+        self.attribution = attribution
+        self.usesAppleWeather = usesAppleWeather
         _selection = selection
         _draft = State(initialValue: selection.wrappedValue)
         self.onSave = onSave
@@ -616,6 +633,10 @@ private struct UseWeatherSheetView: View {
                         Text("Use Weather")
                             .font(.outfitBody(24, weight: .bold))
                             .foregroundStyle(Color.black)
+
+                        if usesAppleWeather {
+                            WeatherAttributionView(attribution: attribution)
+                        }
 
                         VStack(alignment: .leading, spacing: 10) {
                             OutfitSheetSectionTitle("Select Weather")
@@ -662,6 +683,7 @@ private struct UseWeatherSheetView: View {
 
                 VStack(spacing: 12) {
                     OutfitSheetPrimaryButton(title: "Save", systemImage: "checkmark") {
+                        draft.isAvailable = true
                         selection = draft
                         onSave()
                         dismiss()

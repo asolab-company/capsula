@@ -1,7 +1,9 @@
+/* SUBSCRIPTIONS_DISABLED_V1 — preserved for restoring subscriptions.
 import SwiftUI
 import SafariServices
 
 struct PaywallView: View {
+    @Environment(\.scenePhase) private var scenePhase
     @Environment(OutfitDataStore.self) private var store
     @Environment(AppRouter.self) private var router
     @Environment(SubscriptionStore.self) private var subscriptionStore
@@ -60,8 +62,18 @@ struct PaywallView: View {
             }
             .appFrame(x: 18, y: layout.buttonY, w: 356, h: 56)
 
-            PaywallCancelAnytime()
-                .appFrame(x: 137, y: layout.cancelAnytimeY, w: 120, h: 21)
+            Group {
+                if subscriptionStore.monthlyProduct == nil {
+                    Text(subscriptionStore.isLoadingProducts
+                         ? "Connecting to the App Store…"
+                         : "Couldn’t load the price. Please tap Retry.")
+                        .font(.outfitBody(12, weight: .regular))
+                        .foregroundStyle(OutfitTheme.Color.secondaryText)
+                } else {
+                    PaywallCancelAnytime()
+                }
+            }
+            .appFrame(x: 18, y: layout.cancelAnytimeY, w: 356, h: 21)
 
             PaywallFooterLinks(
                 onPrivacy: { legalDocument = .privacy },
@@ -76,7 +88,8 @@ struct PaywallView: View {
             .appFrame(x: 42, y: layout.footerY, w: 311, h: 14)
         }
         .toolbar(.hidden, for: .navigationBar)
-        .task {
+        .task(id: scenePhase) {
+            guard scenePhase == .active else { return }
             await subscriptionStore.loadProducts()
             await subscriptionStore.refreshEntitlements()
             store.hasPremiumAccess = subscriptionStore.hasActiveSubscription
@@ -114,6 +127,11 @@ struct PaywallView: View {
     }
 
     private func unlockProFeatures() async {
+        // Retry only loads the price. A separate tap confirms the purchase intent.
+        guard subscriptionStore.monthlyProduct != nil else {
+            await subscriptionStore.loadProducts(forceReload: true)
+            return
+        }
         switch await subscriptionStore.purchaseMonthly() {
         case .purchased:
             finishPremiumFlow()
@@ -530,3 +548,5 @@ private struct PaywallFooterLinks: View {
         .environment(AppRouter())
         .environment(SubscriptionStore())
 }
+
+*/

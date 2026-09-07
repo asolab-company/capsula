@@ -6,8 +6,28 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		1E1B2A39DF7DAB6009B5A177 /* SubscriptionStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91D230CF038222168D388616 /* SubscriptionStoreTests.swift */; };
+		C4836E7AB373527EA38C0FCD /* TestSub.storekit in Resources */ = {isa = PBXBuildFile; fileRef = 2A48F9027FA1D8C9C240E593 /* TestSub.storekit */; };
+		DD44FBAD4532E1CB26A79677 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3512401555D39DB3A794944C /* Foundation.framework */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		35001755D3CEE2B0F0138B49 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 9CFED5B12FD09068004876ED /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 9CFED5B82FD09068004876ED;
+			remoteInfo = OutFit;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
+		2A48F9027FA1D8C9C240E593 /* TestSub.storekit */ = {isa = PBXFileReference; includeInIndex = 1; name = TestSub.storekit; path = ../OutFit/TestSub.storekit; sourceTree = "<group>"; };
+		3512401555D39DB3A794944C /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		91D230CF038222168D388616 /* SubscriptionStoreTests.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = SubscriptionStoreTests.swift; sourceTree = "<group>"; };
 		9CFED5B92FD09068004876ED /* OutFit.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OutFit.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		CDEC656295F6D9E2A1DF3733 /* OutFitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OutFitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -32,6 +52,14 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		1AB0EBBA6385AD6A10AB8BD0 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DD44FBAD4532E1CB26A79677 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		9CFED5B62FD09068004876ED /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -42,11 +70,31 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		41C9A5434CCDDA64282BD294 /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				3512401555D39DB3A794944C /* Foundation.framework */,
+			);
+			name = iOS;
+			sourceTree = "<group>";
+		};
+		7576A50DE59A9142E160A491 /* OutFitTests */ = {
+			isa = PBXGroup;
+			children = (
+				91D230CF038222168D388616 /* SubscriptionStoreTests.swift */,
+				2A48F9027FA1D8C9C240E593 /* TestSub.storekit */,
+			);
+			name = OutFitTests;
+			path = OutFitTests;
+			sourceTree = "<group>";
+		};
 		9CFED5B02FD09068004876ED = {
 			isa = PBXGroup;
 			children = (
 				9CFED5BB2FD09068004876ED /* OutFit */,
 				9CFED5BA2FD09068004876ED /* Products */,
+				A14DFAC33B34D5FDBA1AAA6E /* Frameworks */,
+				7576A50DE59A9142E160A491 /* OutFitTests */,
 			);
 			sourceTree = "<group>";
 		};
@@ -54,13 +102,40 @@
 			isa = PBXGroup;
 			children = (
 				9CFED5B92FD09068004876ED /* OutFit.app */,
+				CDEC656295F6D9E2A1DF3733 /* OutFitTests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		A14DFAC33B34D5FDBA1AAA6E /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				41C9A5434CCDDA64282BD294 /* iOS */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		6E291183C56A86CEEEE7CF05 /* OutFitTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CB38360060191DF19F74B13C /* Build configuration list for PBXNativeTarget "OutFitTests" */;
+			buildPhases = (
+				BBFB11D166E4619B6908428F /* Sources */,
+				1AB0EBBA6385AD6A10AB8BD0 /* Frameworks */,
+				3154152DEB4F7F78CEF784BB /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				C18030A37320C66D3B4C2653 /* PBXTargetDependency */,
+			);
+			name = OutFitTests;
+			productName = OutFitTests;
+			productReference = CDEC656295F6D9E2A1DF3733 /* OutFitTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		9CFED5B82FD09068004876ED /* OutFit */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 9CFED5C42FD09069004876ED /* Build configuration list for PBXNativeTarget "OutFit" */;
@@ -77,8 +152,6 @@
 				9CFED5BB2FD09068004876ED /* OutFit */,
 			);
 			name = OutFit;
-			packageProductDependencies = (
-			);
 			productName = OutFit;
 			productReference = 9CFED5B92FD09068004876ED /* OutFit.app */;
 			productType = "com.apple.product-type.application";
@@ -97,7 +170,8 @@
 						CreatedOnToolsVersion = 26.5;
 						SystemCapabilities = {
 							com.apple.InAppPurchase = {
-								enabled = 1;
+								/* SUBSCRIPTIONS_DISABLED_V1: enabled = 1; */
+								enabled = 0;
 							};
 						};
 					};
@@ -118,11 +192,20 @@
 			projectRoot = "";
 			targets = (
 				9CFED5B82FD09068004876ED /* OutFit */,
+				6E291183C56A86CEEEE7CF05 /* OutFitTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		3154152DEB4F7F78CEF784BB /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C4836E7AB373527EA38C0FCD /* TestSub.storekit in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		9CFED5B72FD09068004876ED /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -140,9 +223,44 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		BBFB11D166E4619B6908428F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1E1B2A39DF7DAB6009B5A177 /* SubscriptionStoreTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		C18030A37320C66D3B4C2653 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = OutFit;
+			target = 9CFED5B82FD09068004876ED /* OutFit */;
+			targetProxy = 35001755D3CEE2B0F0138B49 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		5FAD7C4DFEEFCA72922E7130 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.capsula.wardrobe.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/OutFit.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/OutFit";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 		9CFED5C22FD09069004876ED /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -264,7 +382,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = OutFit/OutFit.entitlements;
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 7;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -314,7 +432,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = OutFit/OutFit.entitlements;
 				CODE_SIGN_STYLE = Manual;
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 7;
 				DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -357,6 +475,23 @@
 			};
 			name = Release;
 		};
+		F8851E84FDFA6DCD2E955490 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.capsula.wardrobe.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_STRICT_CONCURRENCY = complete;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/OutFit.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/OutFit";
+			};
+			name = Debug;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -374,6 +509,15 @@
 			buildConfigurations = (
 				9CFED5C52FD09069004876ED /* Debug */,
 				9CFED5C62FD09069004876ED /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CB38360060191DF19F74B13C /* Build configuration list for PBXNativeTarget "OutFitTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5FAD7C4DFEEFCA72922E7130 /* Release */,
+				F8851E84FDFA6DCD2E955490 /* Debug */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

@@ -4,7 +4,9 @@ struct AppView: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var store = OutfitDataStore()
     @State private var router = AppRouter()
+/* SUBSCRIPTIONS_DISABLED_V1 — preserved for restoring subscriptions.
     @State private var subscriptionStore = SubscriptionStore()
+*/
 
     var body: some View {
         @Bindable var router = router
@@ -21,6 +23,7 @@ struct AppView: View {
                 routeDestination(route)
             }
         }
+/* SUBSCRIPTIONS_DISABLED_V1 — preserved for restoring subscriptions.
         .fullScreenCover(item: $router.paywallPresentation) { presentation in
             PaywallView(plan: .monthly, source: presentation.source)
                 .environment(store)
@@ -28,13 +31,15 @@ struct AppView: View {
                 .environment(subscriptionStore)
                 .ignoresSafeArea()
         }
+*/
         .environment(store)
         .environment(router)
-        .environment(subscriptionStore)
+        // SUBSCRIPTIONS_DISABLED_V1: .environment(subscriptionStore)
         .preferredColorScheme(.light)
         .task {
             _ = try? await OpenAIAvatarService().cachedAPIKey()
         }
+/* SUBSCRIPTIONS_DISABLED_V1 — preserved for restoring subscriptions.
         .task {
             await subscriptionStore.start()
             store.hasPremiumAccess = subscriptionStore.hasActiveSubscription
@@ -48,17 +53,23 @@ struct AppView: View {
                 await subscriptionStore.refreshEntitlements()
             }
         }
+*/
     }
 
     @ViewBuilder
     private func routeDestination(_ route: AppRoute) -> some View {
         switch route {
+/* SUBSCRIPTIONS_DISABLED_V1 — preserved for restoring subscriptions.
         case .paywall:
             PaywallView(plan: .monthly, source: .onboarding)
         case .premiumPaywall:
             PaywallView(plan: .monthly, source: .inApp)
         case .monthlyPaywall:
             PaywallView(plan: .monthly, source: .onboarding)
+
+*/
+        case .paywall, .premiumPaywall, .monthlyPaywall:
+            EmptyView()
         case .addItemAccess:
             AccessExplainerView(kind: .clothing)
         case .cameraSettings(let kind):
@@ -116,9 +127,13 @@ struct AppView: View {
 struct MainTabShell: View {
     @Environment(OutfitDataStore.self) private var store
     @Environment(AppRouter.self) private var router
+/* SUBSCRIPTIONS_DISABLED_V1 — preserved for restoring subscriptions.
     @Environment(SubscriptionStore.self) private var subscriptionStore
+*/
     @Environment(\.smallDeviceAdaptation) private var smallDeviceAdaptation
+/* SUBSCRIPTIONS_DISABLED_V1 — preserved for restoring subscriptions.
     @State private var didPresentStartupPaywall = false
+*/
 
     var body: some View {
         @Bindable var router = router
@@ -161,6 +176,7 @@ struct MainTabShell: View {
             .animation(.spring(response: 0.36, dampingFraction: 0.9), value: router.accessPresentation?.id)
         }
         .ignoresSafeArea()
+/* SUBSCRIPTIONS_DISABLED_V1 — preserved for restoring subscriptions.
         .task {
             await subscriptionStore.refreshEntitlements()
             store.hasPremiumAccess = subscriptionStore.hasActiveSubscription
@@ -173,5 +189,6 @@ struct MainTabShell: View {
             didPresentStartupPaywall = true
             router.presentPaywall(source: .inApp)
         }
+*/
     }
 }
