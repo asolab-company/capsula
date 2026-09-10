@@ -9,14 +9,11 @@ final class OutfitDataStore {
             UserDefaults.standard.set(didCompleteOnboarding, forKey: AppConstants.Storage.didCompleteOnboarding)
         }
     }
-/* SUBSCRIPTIONS_DISABLED_V1 — preserved for restoring subscriptions.
     var hasPremiumAccess: Bool {
         didSet {
             UserDefaults.standard.set(hasPremiumAccess, forKey: AppConstants.Storage.hasPremiumAccess)
         }
     }
-*/
-    var hasPremiumAccess: Bool { true } // All features are free in v1.
     var didAcceptWardrobeAnalysis: Bool {
         didSet {
             UserDefaults.standard.set(didAcceptWardrobeAnalysis, forKey: AppConstants.Storage.didAcceptWardrobeAnalysis)
@@ -85,9 +82,7 @@ final class OutfitDataStore {
 
     init() {
         didCompleteOnboarding = UserDefaults.standard.bool(forKey: AppConstants.Storage.didCompleteOnboarding)
-/* SUBSCRIPTIONS_DISABLED_V1 — preserved for restoring subscriptions.
         hasPremiumAccess = UserDefaults.standard.bool(forKey: AppConstants.Storage.hasPremiumAccess)
-*/
         didAcceptWardrobeAnalysis = UserDefaults.standard.bool(forKey: AppConstants.Storage.didAcceptWardrobeAnalysis)
         profileHasAge = UserDefaults.standard.bool(forKey: AppConstants.Storage.profileHasAge)
         profileHasGender = UserDefaults.standard.bool(forKey: AppConstants.Storage.profileHasGender)
@@ -170,7 +165,6 @@ final class OutfitDataStore {
         return categories
     }
 
-/* SUBSCRIPTIONS_DISABLED_V1 — preserved for restoring subscriptions.
     var weeklyOutfitGenerationLimit: Int {
         hasPremiumAccess ? AppConstants.FeatureLimits.proOutfitGenerationsPerWeek : AppConstants.FeatureLimits.freeOutfitGenerationsPerWeek
     }
@@ -210,16 +204,6 @@ final class OutfitDataStore {
         clothingAnalysisWeekCount += 1
         return true
     }
-
-
-*/
-    // Free first release: subscription quotas and premium gates are disabled.
-    var canGenerateOutfitThisWeek: Bool { true }
-    var canAnalyzeClothingThisWeek: Bool { true }
-    var canCreateCollection: Bool { true }
-    var canCreateAvatar: Bool { true }
-    func recordOutfitGenerationIfAllowed() -> Bool { true }
-    func recordClothingAnalysisIfAllowed() -> Bool { true }
 
     func saveGeneratedAvatar(data: Data) {
         guard canCreateAvatar else { return }
@@ -443,9 +427,7 @@ final class OutfitDataStore {
         profileHasAge = false
         profileHasGender = false
         profile = ProfileSummary(name: "", age: 25, gender: "Female", clothingCount: 0, outfitCount: 0, favoriteCount: 0)
-/* SUBSCRIPTIONS_DISABLED_V1 — preserved for restoring subscriptions.
         hasPremiumAccess = false
-*/
         didAcceptWardrobeAnalysis = false
         didCompleteOnboarding = false
 

@@ -15,8 +15,6 @@ struct LocalWeatherSnapshot: Equatable {
 
 @MainActor
 final class WeatherKitManager: NSObject, ObservableObject, CLLocationManagerDelegate {
-    @Published private(set) var attribution: WeatherAttribution?
-    private var attributionTask: Task<Void, Never>?
     @Published private(set) var snapshot = LocalWeatherSnapshot.placeholder
 
     private let locationManager = CLLocationManager()
@@ -29,7 +27,6 @@ final class WeatherKitManager: NSObject, ObservableObject, CLLocationManagerDele
     }
 
     func start() {
-        loadAttributionIfNeeded()
         switch locationManager.authorizationStatus {
         case .notDetermined:
             locationManager.requestWhenInUseAuthorization()
@@ -39,15 +36,6 @@ final class WeatherKitManager: NSObject, ObservableObject, CLLocationManagerDele
             snapshot = .placeholder
         @unknown default:
             snapshot = .placeholder
-        }
-    }
-
-    private func loadAttributionIfNeeded() {
-        guard attribution == nil, attributionTask == nil else { return }
-        attributionTask = Task { [weak self] in
-            let attribution = try? await WeatherService.shared.attribution
-            self?.attribution = attribution
-            self?.attributionTask = nil
         }
     }
 

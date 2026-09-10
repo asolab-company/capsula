@@ -241,8 +241,7 @@ private struct AvatarFreeMixMatchView: View {
                 .lineLimit(2)
                 .appFrame(x: 42, y: layout.stepTitleY, w: 308, h: 66, adjustsTopInset: false)
 
-            // SUBSCRIPTIONS_DISABLED_V1: AppPrimaryButton(title: store.canCreateAvatar ? "Create Avatar" : "Upgrade & Unlock") {
-            AppPrimaryButton(title: "Create Avatar") {
+            AppPrimaryButton(title: store.canCreateAvatar ? "Create Avatar" : "Upgrade & Unlock") {
                 if store.canCreateAvatar {
                     router.push(.avatarOnboarding)
                 } else {
@@ -349,8 +348,7 @@ struct MixMatchOnboardingView: View {
             AppText(value: steps[step], role: .appTitle, alignment: .center)
                 .appFrame(x: 42, y: 536, w: 308, h: 58)
 
-            // SUBSCRIPTIONS_DISABLED_V1: AppPrimaryButton(title: step == 2 ? "Create Avatar" : "Upgrade & Unlock") {
-            AppPrimaryButton(title: step == 2 ? "Create Avatar" : "Continue") {
+            AppPrimaryButton(title: step == 2 ? "Create Avatar" : "Upgrade & Unlock") {
                 if step < 2 {
                     withAnimation(.smooth(duration: 0.2)) {
                         step += 1

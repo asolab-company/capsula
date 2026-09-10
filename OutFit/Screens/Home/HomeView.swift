@@ -40,8 +40,7 @@ struct HomeView: View {
                 title: "Pack Smarter for Trips",
                 subtitle: "Generate packing lists and travel-ready outfits instantly.",
                 iconName: "app_ic_home_feature_trips",
-                // SUBSCRIPTIONS_DISABLED_V1: locked: true
-                locked: false
+                locked: true
             ))
         }
 
@@ -50,8 +49,7 @@ struct HomeView: View {
                 title: "Dress for the Weather",
                 subtitle: "Get outfit suggestions based on today's forecast, temperature, and season.",
                 iconName: "app_ic_home_feature_weather",
-                // SUBSCRIPTIONS_DISABLED_V1: locked: true
-                locked: false
+                locked: true
             ))
         }
 
@@ -60,8 +58,7 @@ struct HomeView: View {
                 title: "Create Your AI Avatar",
                 subtitle: "See outfits on your personalized avatar before wearing them in real life.",
                 iconName: "app_ic_home_feature_avatar",
-                // SUBSCRIPTIONS_DISABLED_V1: locked: true
-                locked: false
+                locked: true
             ))
         }
 
@@ -81,9 +78,6 @@ struct HomeView: View {
             HomeGreetingHeader(name: store.profile.name, weather: weather.snapshot)
             .appFrame(x: 18, y: 71, w: 356, h: 48, alignment: .topLeading)
 
-            WeatherAttributionView(attribution: weather.attribution)
-                .appFrame(x: 18, y: smallDeviceAdaptation.underHeaderY(123), w: 356, h: 44)
-
             if store.wardrobeItems.count >= 5 {
                 HomeOutfitPromptPill(
                     text: $outfitPrompt,
@@ -93,7 +87,7 @@ struct HomeView: View {
                 ) {
                     submitOutfitPrompt()
                 }
-                .appFrame(x: 18, y: smallDeviceAdaptation.underHeaderY(182), w: 356, h: 50)
+                .appFrame(x: 18, y: smallDeviceAdaptation.underHeaderY(150), w: 356, h: 50)
             }
         }
         .task {
@@ -128,9 +122,9 @@ struct HomeView: View {
         }
         .appFrame(
             x: 0,
-            y: smallDeviceAdaptation.underHeaderY(170),
+            y: smallDeviceAdaptation.underHeaderY(138),
             w: 393,
-            h: smallDeviceAdaptation.underHeaderHeight(616),
+            h: smallDeviceAdaptation.underHeaderHeight(648),
             alignment: .topLeading
         )
     }
@@ -187,9 +181,9 @@ struct HomeView: View {
         }
         .appFrame(
             x: 0,
-            y: smallDeviceAdaptation.underHeaderY(246),
+            y: smallDeviceAdaptation.underHeaderY(214),
             w: 393,
-            h: smallDeviceAdaptation.underHeaderHeight(540),
+            h: smallDeviceAdaptation.underHeaderHeight(572),
             alignment: .topLeading
         )
     }

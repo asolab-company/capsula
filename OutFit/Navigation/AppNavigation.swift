@@ -68,12 +68,6 @@ enum CaptureKind: String, Hashable {
     case profile
 }
 
-// Kept so the commented subscription navigation can be restored later.
-enum PaywallSource {
-    case onboarding
-    case inApp
-}
-
 struct PaywallPresentation: Identifiable {
     let id = UUID()
     let source: PaywallSource
@@ -93,13 +87,10 @@ final class AppRouter {
     var accessPresentation: AccessPresentation?
 
     func push(_ route: AppRoute) {
-        // First release has no subscription destinations.
-        if [.paywall, .premiumPaywall, .monthlyPaywall].contains(route) { return }
         path.append(route)
     }
 
     func replaceLast(with route: AppRoute) {
-        if [.paywall, .premiumPaywall, .monthlyPaywall].contains(route) { return }
         if path.isEmpty {
             path.append(route)
         } else {
@@ -108,9 +99,7 @@ final class AppRouter {
     }
 
     func presentPaywall(source: PaywallSource) {
-/* SUBSCRIPTIONS_DISABLED_V1 — preserved for restoring subscriptions.
         paywallPresentation = PaywallPresentation(source: source)
-*/
     }
 
     func dismissPaywall() {
